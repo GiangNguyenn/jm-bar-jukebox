@@ -5,19 +5,30 @@ import { useSpotifyPlayer } from '@/hooks/useSpotifyPlayer'
 import { sendApiRequest } from '@/shared/api'
 import { SpotifyPlaybackState } from '@/shared/types'
 
+interface SpotifyPlayer {
+  addListener(event: string, callback: (state: any) => void): void;
+  removeListener(event: string, callback: (state: any) => void): void;
+  connect(): Promise<boolean>;
+  disconnect(): void;
+  getCurrentState(): Promise<any>;
+  setVolume(volume: number): Promise<void>;
+  togglePlay(): Promise<void>;
+  activateElement(): Promise<void>;
+}
+
+// Extend Window interface for our custom properties only
 declare global {
   interface Window {
-    Spotify: any
-    onSpotifyWebPlaybackSDKReady: () => void
-    refreshSpotifyPlayer?: () => Promise<void>
-    spotifyPlayerInstance?: any
+    onSpotifyWebPlaybackSDKReady: () => void;
+    refreshSpotifyPlayer?: () => Promise<void>;
+    spotifyPlayerInstance?: SpotifyPlayer;
   }
 }
 
 // Singleton to track initialization state
 let isInitialized = false;
 let initializationPromise: Promise<void> | null = null;
-let playerInstance: any = null;
+let playerInstance: SpotifyPlayer | null = null;
 
 export default function SpotifyPlayer() {
   const [error, setError] = useState<string | null>(null)
